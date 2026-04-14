@@ -1,0 +1,397 @@
+---
+sidebar_position: 28
+sidebar_label: Friendly Captcha
+title: "Automatic Friendly Captcha Recognition and Bypass | API"
+description: "Learn how to detect Friendly Captcha using the API of the CapMonster Cloud captcha recognition and solving service!"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import ParamItem from '@theme/ParamItem';
+import MethodItem from '@theme/MethodItem';
+import ImageWrap from '@theme/ImageWrap';
+import ImagesLayout from '@theme/ImagesLayout';
+import MethodDescription from '@theme/MethodDescription'
+import PriceBlock from '@theme/PriceBlock';
+import PriceBlockWrap from '@theme/PriceBlockWrap';
+import { ArticleHead } from '../../../../../src/theme/ArticleHead';
+
+<ArticleHead slug="captchas/friendly-task" />
+
+# Friendly Captcha
+
+<PriceBlockWrap>
+  <PriceBlock title="Friendly Captcha" captchaId="friendly"/>
+</PriceBlockWrap>
+
+![](./images/friendly-task/friendly.png)
+
+:::warning **Attention!**
+CapMonster Cloud uses built-in proxies by default — their cost is already included in the service. You only need to specify your own proxies in cases where the website does not accept the token or access to the built-in services is restricted.
+
+If you are using a proxy with IP authorization, make sure to whitelist the address **65.21.190.34**.
+:::
+
+## Request parameters
+
+<TabItem value="proxy" label="CustomTask (when using a proxy)" className="bordered-panel">
+
+  <ParamItem title="type" required type="string" />
+  **CustomTask**
+
+  ---
+
+  <ParamItem title="class" required type="string" />
+  **friendly**
+
+   --- 
+
+  <ParamItem title="websiteURL" required type="string" />
+  Full URL of the page with the captcha.
+
+  ---
+
+  <ParamItem title="websiteKey" required type="string" />
+  Friendly Captcha key (*see section [How to find the sitekey value](#how-to-find-the-sitekey-value)*).
+  
+  ---
+
+  <ParamItem title="apiGetLib (inside metadata)" required type="string" />
+  URL of the JS file. Specify the URL depending on the captcha version:
+
+* **V1:**
+  `apiGetLib` = `https://cdn.jsdelivr.net/npm/friendly-challenge@X.Y.Z/widget.module.min.js`, where `X.Y.Z` is the client version from the `x-frc-client` header.
+
+* **V2:**
+  `apiGetLib` = URL of the `site.min.js` file loaded on the page.
+
+
+*See also sections [Create task method](#create-task-method) and [How to determine Friendly Captcha version](#how-to-determine-friendly-captcha-version).*
+
+  ---
+
+  <ParamItem title="userAgent" type="string" />
+Browser User-Agent.<br />
+**Provide only the current Windows UA:** userAgentPlaceholder
+
+---
+
+  <ParamItem title="proxyType" type="string" />
+  **http** - regular HTTP/HTTPS proxy;<br />
+  **https** - use if http doesn’t work (required for some custom proxies);<br />
+  **socks4** - SOCKS4 proxy;<br />
+  **socks5** - SOCKS5 proxy.
+
+---
+
+  <ParamItem title="proxyAddress" type="string" />
+  <p>
+    Proxy IP address (IPv4/IPv6). Not allowed:
+    - Transparent proxies
+    - Local machine proxies
+  </p>
+
+---
+
+  <ParamItem title="proxyPort" type="integer" />
+  Proxy port.
+
+---
+
+  <ParamItem title="proxyLogin" type="string" />
+  Proxy login.
+
+---
+
+  <ParamItem title="proxyPassword" type="string" />
+  Proxy password.
+
+</TabItem>
+
+## Create task method
+
+
+Use the `apiGetLib` parameter value in `metadata` according to the Friendly Captcha version.
+
+**Example:**
+
+For **V1**
+  ```json
+  "apiGetLib": "https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.19/widget.module.min.js"
+```
+
+For **V2**
+
+```json
+"apiGetLib": "https://example.com/wp-content/plugins/friendly-captcha/public/vendor/v2/site.min.js?ver=0.1.25"
+```
+
+<br />
+<Tabs className="full-width-tabs filled-tabs request-tabs" groupId="captcha-type">
+  <TabItem value="proxyless" label="CustomTask (without proxy)" default className="method-panel">
+    <MethodItem>
+    ```http
+    https://api.capmonster.cloud/createTask
+    ```
+    </MethodItem>
+    <MethodDescription>
+
+  **Request**
+  ```json
+  {
+    "clientKey": "API_KEY",
+    "task": {
+      "type": "CustomTask",
+      "class": "friendly",
+      "websiteKey": "FFMGEMAD2K3JJ35P",
+      "websiteURL": "https://example.com",
+      "userAgent": "userAgentPlaceholder",
+      "metadata": {
+		"apiGetLib":"https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.19/widget.module.min.js"
+	}
+}
+  ```
+
+  **Response**
+  ```json
+  {
+    "errorId": 0,
+    "taskId": 407533077
+  }
+  ```
+</MethodDescription>
+  </TabItem>
+
+<TabItem value="proxy" label="CustomTask (with proxy)" className="method-panel">
+<MethodItem>
+  ```http
+  https://api.capmonster.cloud/createTask
+  ```
+</MethodItem>
+<MethodDescription>
+  
+  **Request**
+  ```json
+  {
+    "clientKey": "API_KEY",
+    "task": {
+      "type": "CustomTask",
+      "class": "friendly",
+      "websiteKey": "FFMGEMAD2K3JJ35P",
+      "websiteURL": "https://example.com",
+      "userAgent": "userAgentPlaceholder",
+      "metadata": {
+		"apiGetLib":"https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.19/widget.module.min.js"
+	},
+      "proxyType": "http",
+      "proxyAddress": "8.8.8.8",
+      "proxyPort": 8080,
+      "proxyLogin": "proxyLoginHere",
+      "proxyPassword": "proxyPasswordHere"
+    }
+  }
+  ```
+
+  **Response**
+  ```json
+  {
+    "errorId": 0,
+    "taskId": 407533077
+  }
+  ```
+</MethodDescription>
+  </TabItem>
+</Tabs>
+
+## Get task result method
+
+Use the [getTaskResult](../api/methods/get-task-result.mdx) method to obtain the Friendly Captcha solution.  
+The token format in the response depends on the captcha version used on the website:
+
+**V1**: `"56a3727f1f9ae4f339c8e512913cd6f8.ac7W...MAKgAAAN+MAQArAAAAjxMBACwAAAB5QgAA.AgAB"`<br />
+
+**V2**: `"AQQA.8Q2TbgK_..._pknXDweJjKT2qwmroOhHcZsU4dHyu-jaGIPx9k7432p_num13buuTu6n4lVA=="`
+
+<TabItem value="proxyless" label="CustomTask (without proxy)" default className="method-panel-full">
+  <MethodItem>
+      ```http
+    https://api.capmonster.cloud/getTaskResult
+    ```
+  </MethodItem>
+  <MethodDescription>
+
+  **Request**
+  ```json
+  {
+    "clientKey": "API_KEY",
+    "taskId": 407533077
+  }
+```
+
+**Response**
+
+```json
+{
+  "errorId": 0,
+  "errorCode": null,
+  "errorDescription": null,
+  "status": "ready",
+  "solution": {
+    "data": {
+      "token": "56a3727f1f9ae4f339c8e512913cd6f8.ac7W...MAKgAAAN+MAQArAAAAjxMBACwAAAB5QgAA.AgAB"
+    }
+  }
+}
+```
+
+  </MethodDescription>
+</TabItem>
+<br />
+The obtained token value should be inserted into the corresponding field:
+
+| Version | Token field                  |
+| ------- | ---------------------------- |
+| V1      | `input.frc-captcha-solution` |
+| V2      | `input.frc-captcha-response` |
+
+
+## How to find the sitekey value
+
+- For **V1**, this parameter can be found in network requests by filtering them with the keywords `sitekey` or `puzzle?sitekey=`:
+
+![](./images/friendly-task/sitekey.png) 
+
+---
+
+- For **V2**, use search with the keywords `sitekey` or `data-sitekey` in network requests or in the page source elements:
+
+![](./images/friendly-task/sitekey1.png) 
+
+## How to determine Friendly Captcha version
+
+Friendly Captcha can be used in two main versions: **V1** and **V2**.  
+The version can be identified by loaded scripts or network requests.
+
+### Friendly Captcha V1
+
+Used if the following scripts are present on the page:
+
+```javascript
+widget.min.js
+widget.module.min.js
+```
+
+or if `puzzle?sitekey=` appears in network requests:
+
+![](./images/friendly-task/v1.png)
+
+**To determine the client version, you need to:**
+
+1. Open the found `puzzle?sitekey=...` request and go to **Headers → Request Headers**
+
+2. Find the `x-frc-client` header:
+
+![](./images/friendly-task/v1-1.png)
+
+The header contains the Friendly Captcha client version used on the site:
+
+```
+x-frc-client: <version>
+```
+
+**Example values**: *0.9.14, 0.9.19*, etc.
+
+3. After determining the version from `x-frc-client`, insert it into the CDN link:
+
+```
+https://cdn.jsdelivr.net/npm/friendly-challenge@<VERSION>/widget.module.min.js
+```
+
+For example, if `x-frc-client = 0.9.14`, use:
+
+```
+https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.14/widget.module.min.js
+```
+
+This link must be passed into the `apiGetLib` parameter when creating a task.
+
+---
+
+### Friendly Captcha V2
+
+If `site.min.js` is loaded on the site, it means **Friendly Captcha V2** is used.
+
+![](./images/friendly-task/v2.png)
+
+Pass the `site.min.js` URL into the `apiGetLib` parameter when creating a task:
+
+![](./images/friendly-task/v2-1.png)
+
+### Automatic detection of Friendly Captcha version
+
+You can automate the process of detecting the Friendly Captcha version in the browser using the following solution:
+
+<details>
+      <summary>Show code</summary>
+```javascript
+(async function detectFriendlyCaptcha() {
+  const result = {
+    version: null,      
+    clientVersion: null,
+    indicators: [],
+    siteMinJsLinks: []
+  };
+
+  const scripts = Array.from(document.scripts).map(s => s.src);
+
+  for (const src of scripts) {
+    if (!src) continue;
+
+    if (src.includes("site.min.js")) {
+      result.version = "V2";
+      result.indicators.push("Found site.min.js");
+      result.siteMinJsLinks.push(src);
+    }
+
+    if (src.includes("widget.min.js") || src.includes("widget.module.min.js")) {
+      result.version = "V1";
+      result.indicators.push("Found widget script");
+    }
+
+    const match = src.match(/friendly-challenge@(\d+\.\d+\.\d+)/);
+    if (match) {
+      result.clientVersion = match[1];
+      result.version = "V1";
+      result.indicators.push("Detected CDN version");
+    }
+  }
+
+  const puzzleElements = document.querySelectorAll(
+    '[id*="friendly"], [class*="frc"], iframe[src*="friendly"]'
+  );
+
+  if (puzzleElements.length > 0) {
+    result.indicators.push("Found captcha DOM elements");
+    if (!result.version) result.version = "V1";
+  }
+
+  const resources = performance.getEntriesByType("resource");
+
+  for (const r of resources) {
+    if (r.name.includes("puzzle?sitekey")) {
+      result.version = "V1";
+      result.indicators.push("Found puzzle?sitekey request");
+    }
+  }
+
+  if (!result.version) {
+    result.version = "Unknown (not detected)";
+  }
+
+  console.log("FriendlyCaptcha Detection Result:");
+  console.log(result);
+
+  return result;
+})();
+```
+</details>
