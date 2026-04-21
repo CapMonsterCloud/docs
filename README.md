@@ -10,7 +10,7 @@ Most developers should use the published docs site. This repository is useful wh
 - Dashboard: [dash.capmonster.cloud](https://dash.capmonster.cloud/)
 - Main site: [capmonster.cloud](https://capmonster.cloud/)
 
-$ Want to test before depositing? Contact support and we’ll add trial credits to your account.
+💵 Want to test before depositing? Contact support and we’ll add trial credits to your account.
 
 ## Local development
 
