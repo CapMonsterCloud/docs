@@ -1,8 +1,8 @@
 # CapMonster Cloud Docs
 
-Source for the public developer documentation at [docs.capmonster.cloud](https://docs.capmonster.cloud/).
+Source repository for the public developer documentation at [docs.capmonster.cloud](https://docs.capmonster.cloud/).
 
-Most developers should use the published docs site. This repository is useful when you want to contribute to the docs or run the site locally.
+If you want to use the API, start with the published docs site. This repository is useful when you want to contribute to the docs or run the site locally.
 
 ## Links
 
