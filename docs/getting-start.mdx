@@ -12,7 +12,17 @@ import { ArticleHead } from '../src/theme/ArticleHead';
 
 # Начало работы
 
-Раздел содержит инструкции по началу работы с сервисом, а также описывает основные методы отправки капч и их распознавания.
+Эта страница помогает быстро получить API-ключ, пополнить баланс и отправить первую задачу в CapMonster Cloud.
+
+## Быстрый старт через API
+
+Если вы интегрируете сервис в код, обычно достаточно трёх шагов:
+
+1. Получить API-ключ в [личном кабинете](https://capmonster.cloud/Dashboard).
+2. Создать задачу через метод [createTask](api/methods/create-task.mdx).
+3. Запрашивать результат через [getTaskResult](api/methods/get-task-result.mdx), пока задача не перейдёт в статус `ready`.
+
+Если вам удобнее сначала протестировать сервис в браузере, начните с [расширения CapMonster Cloud](../../docs/extension).
 
 ## Шаг 1. Создайте аккаунт
 
@@ -54,11 +64,11 @@ https://api.capmonster.cloud
  
 |**Язык**|**Ссылка на репозиторий**|
 | :- | :- | 
-|С#|- [Nuget](https://www.nuget.org/packages/Zennolab.CapMonsterCloud.Client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-dotnet) |
-|Python|- [PyPl](https://pypi.org/project/capmonstercloudclient/)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-python)|
-|JS|- [Npm](https://www.npmjs.com/package/@zennolab_com/capmonstercloud-client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-js)|
-|GO|- [Pkg.go.dev](https://pkg.go.dev/github.com/ZennoLab/capmonstercloud-client-go)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-go)|
-|PHP|- [Packagist](https://packagist.org/packages/zennolab/capmonstercloud.client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-php)|
+|С#|- [Nuget](https://www.nuget.org/packages/Zennolab.CapMonsterCloud.Client)<br /> - [Github](https://github.com/CapMonsterCloud/client-dotnet) |
+|Python|- [PyPl](https://pypi.org/project/capmonstercloudclient/)<br /> - [Github](https://github.com/CapMonsterCloud/client-python)|
+|JS|- [Npm](https://www.npmjs.com/package/@zennolab_com/capmonstercloud-client)<br /> - [Github](https://github.com/CapMonsterCloud/client-js)|
+|GO|- [Pkg.go.dev](https://pkg.go.dev/github.com/ZennoLab/capmonstercloud-client-go)<br /> - [Github](https://github.com/CapMonsterCloud/client-go)|
+|PHP|- [Packagist](https://packagist.org/packages/zennolab/capmonstercloud.client)<br /> - [Github](https://github.com/CapMonsterCloud/client-php)|
 
 ## Методы распознавания капчи
 
