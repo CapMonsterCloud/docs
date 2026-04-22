@@ -2,7 +2,7 @@
 
 Source repository for the public developer documentation at [docs.capmonster.cloud](https://docs.capmonster.cloud/).
 
-If you want to use the API, start with the published docs site. This repository is useful when you want to contribute to the docs or run the site locally.
+If you want to use the API, start with the published docs site. Use this repository when you want to contribute to the docs or run the site locally.
 
 ## Links
 
@@ -10,7 +10,7 @@ If you want to use the API, start with the published docs site. This repository 
 - Dashboard: [dash.capmonster.cloud](https://dash.capmonster.cloud/)
 - Main site: [capmonster.cloud](https://capmonster.cloud/)
 
-💵 Want to test before depositing? Contact support and we’ll add trial credits to your account.
+Need to test before depositing? Contact support and we’ll add trial credits to your account.
 
 ## Local development
 
