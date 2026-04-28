@@ -12,11 +12,21 @@ import { ArticleHead } from '../src/theme/ArticleHead';
 
 # Начало работы
 
-Раздел содержит инструкции по началу работы с сервисом, а также описывает основные методы отправки капч и их распознавания.
+Эта страница помогает быстро получить API-ключ, пополнить баланс и отправить первую задачу в CapMonster Cloud.
+
+## Быстрый старт через API
+
+Если вы интегрируете сервис в код, обычно достаточно трёх шагов:
+
+1. Получить API-ключ в [личном кабинете](https://dash.capmonster.cloud/).
+2. Создать задачу через метод [createTask](api/methods/create-task.mdx).
+3. Запрашивать результат через [getTaskResult](api/methods/get-task-result.mdx), пока задача не перейдёт в статус `ready`.
+
+Если вам удобнее сначала протестировать сервис в браузере, начните с [расширения CapMonster Cloud](../../docs/extension).
 
 ## Шаг 1. Создайте аккаунт
 
-Прежде чем перейти к решению капч, зарегистрируйтесь в [CapMonster Cloud](https://capmonster.cloud/) удобным для вас способом. Затем перейдите в [Личный кабинет](https://capmonster.cloud/Dashboard), где вы найдёте всю необходимую информацию — текущий баланс, API-ключ и статистику по успешно решённым и нерешённым задачам.
+Прежде чем перейти к решению капч, зарегистрируйтесь в [CapMonster Cloud](https://capmonster.cloud/) удобным для вас способом. Затем перейдите в [Личный кабинет](https://dash.capmonster.cloud/), где вы найдёте всю необходимую информацию — текущий баланс, API-ключ и статистику по успешно решённым и нерешённым задачам.
 
 ![](./images/dashboard.png)
 
@@ -54,11 +64,11 @@ https://api.capmonster.cloud
  
 |**Язык**|**Ссылка на репозиторий**|
 | :- | :- | 
-|С#|- [Nuget](https://www.nuget.org/packages/Zennolab.CapMonsterCloud.Client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-dotnet) |
-|Python|- [PyPl](https://pypi.org/project/capmonstercloudclient/)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-python)|
-|JS|- [Npm](https://www.npmjs.com/package/@zennolab_com/capmonstercloud-client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-js)|
-|GO|- [Pkg.go.dev](https://pkg.go.dev/github.com/ZennoLab/capmonstercloud-client-go)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-go)|
-|PHP|- [Packagist](https://packagist.org/packages/zennolab/capmonstercloud.client)<br /> - [Github](https://github.com/ZennoLab/capmonstercloud-client-php)|
+|С#|- [Nuget](https://www.nuget.org/packages/Zennolab.CapMonsterCloud.Client)<br /> - [Github](https://github.com/CapMonsterCloud/capmonstercloud-client-dotnet) |
+|Python|- [PyPl](https://pypi.org/project/capmonstercloudclient/)<br /> - [Github](https://github.com/CapMonsterCloud/capmonstercloud-client-python)|
+|JS|- [Npm](https://www.npmjs.com/package/@zennolab_com/capmonstercloud-client)<br /> - [Github](https://github.com/CapMonsterCloud/capmonstercloud-client-js)|
+|GO|- [Pkg.go.dev](https://pkg.go.dev/github.com/ZennoLab/capmonstercloud-client-go)<br /> - [Github](https://github.com/CapMonsterCloud/client-go)|
+|PHP|- [Packagist](https://packagist.org/packages/zennolab/capmonstercloud.client)<br /> - [Github](https://github.com/CapMonsterCloud/client-php)|
 
 ## Методы распознавания капчи
 
@@ -122,14 +132,6 @@ https://api.capmonster.cloud
 ---
 
 ![](./images/getting-started-3.png)
-
-<!-- ### hCaptcha
-
-1. Добавьте в проект, где уже совершен переход на страницу с капчей, экшен “Распознать hCaptcha”;
-
-2. В свойствах действия “Распознать hCaptcha” выберите способ (Во вкладке или Через Sitekey). При выборе через Sitekey укажите sitekey и URL с капчей:
-
-![](./images/getting-started-4.png) -->
 
 ### С помощью HTTP-запросов
 

@@ -1,30 +1,38 @@
-<p align="center"><img src="https://github.com/ZennoLab/capmonstercloud-docs/blob/master/static/img/logo_docs.svg"></p>
+# CapMonster Cloud Docs
 
+Source repository for the public developer documentation at [docs.capmonster.cloud](https://docs.capmonster.cloud/).
 
-# Documentation for CapMonster Cloud
+If you want to use the API, start with the published docs site. Use this repository when you want to contribute to the docs or run the site locally.
 
-This website is built using [Docusaurus 3](https://docusaurus.io/), a modern static website generator.
+## Links
 
-## Installation
+- Published docs: [docs.capmonster.cloud](https://docs.capmonster.cloud/)
+- Dashboard: [dash.capmonster.cloud](https://dash.capmonster.cloud/)
+- Main site: [capmonster.cloud](https://capmonster.cloud/)
+
+Need to test before depositing? Contact support and we’ll add trial credits to your account.
+
+## Local development
+
+Install dependencies:
 
 ```bash
 yarn
 ```
+
 or
+
 ```bash
 npm install
 ```
 
-## Local Development
+Start the local docs site:
 
 ```bash
 yarn start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected in real time, no need to restart the server.
-By default this is the English version.
-
-If you want to start the Russian version, run
+By default this starts the English version. To start the Russian version:
 
 ```bash
 yarn start -- --locale ru
@@ -36,22 +44,4 @@ yarn start -- --locale ru
 yarn build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-After build you can view fully generated site with `ru` and `en` versions, just run
-
-```bash
-yarn serve
-```
-
-## Structure
-
-Russian documentation is located in `/docs`.
-
-Each folder is a category for an article.
-
-English documentation is located in `/i18n/en/docusaurus-plugin-content-docs/current/`.
-
-If you need the same article for ru and en version, you should create a file in `/docs` and `/i18n/en/docusaurus-plugin-content-docs/current/` directories with same filename and folder.
-
-For more information about syntax and structure, you can visit [https://docusaurus.io/](https://docusaurus.io/).
+This generates the static site into the `build` directory.

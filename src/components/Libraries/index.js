@@ -36,7 +36,7 @@ const LibrariesList = [
   {
     title: 'PHP',
     Svg: require('@site/static/img/Php.svg').default,
-    githubLink: 'https://github.com/ZennoLab/capmonstercloud-client-php',
+    githubLink: 'https://github.com/CapMonsterCloud/client-php',
     customLinkName: 'Packagist',
     customLinkUrl: 'https://packagist.org/packages/zennolab/capmonstercloud.client'
   },
