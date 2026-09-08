@@ -25,9 +25,11 @@ import { ArticleHead } from '../../../../../src/theme/ArticleHead';
 ![](./images/funcaptcha/funcaptcha.png)
 
 :::warning **Atenção!**
-O CapMonster Cloud, por padrão, funciona com proxies integrados — já incluídos no custo do serviço. É necessário especificar seus próprios proxies apenas nos casos em que o site não aceita o token ou quando o acesso aos serviços integrados está restrito.
+* Para resolver o FunCaptcha, é necessário usar **seu próprio proxy**.
 
-Se o proxy utiliza autenticação por IP, é necessário adicionar o endereço **65.21.190.34** à lista de permissões (whitelist).
+* Se o proxy utiliza autenticação por IP, adicione o endereço **65.21.190.34** à lista de permissões (whitelist).
+
+* Use o mesmo proxy ao obter os parâmetros do CAPTCHA no site e ao criar a tarefa no CapMonster Cloud.
 :::
 
 ## Parâmetros da solicitação
@@ -90,7 +92,7 @@ cookieName1=value1; cookieName2=value2
 
 ---
 
-<ParamItem title="proxyType" type="string" />
+<ParamItem title="proxyType" required type="string" />
 **http** - proxy http/https comum;<br />
 **https** - tente esta opção apenas se "http" não funcionar (necessário para alguns proxies personalizados);<br />
 **socks4** - proxy socks4;<br />
@@ -98,24 +100,24 @@ cookieName1=value1; cookieName2=value2
 
 ---
 
-<ParamItem title="proxyAddress" type="string" />
+<ParamItem title="proxyAddress" required type="string" />
 Endereço IP do proxy IPv4/IPv6. Não é permitido:   
 - uso de proxies transparentes (que revelem o IP do cliente);  
 - uso de proxies em máquinas locais.
 
 ---
 
-<ParamItem title="proxyPort" type="integer" />
+<ParamItem title="proxyPort" required type="integer" />
 Porta do proxy.
 
 ---
 
-<ParamItem title="proxyLogin" type="string" />
+<ParamItem title="proxyLogin" required type="string" />
 Login do servidor proxy.
 
 ---
 
-<ParamItem title="proxyPassword" type="string" />
+<ParamItem title="proxyPassword" required type="string" />
 Senha do servidor proxy.
 
 ---
@@ -123,45 +125,13 @@ Senha do servidor proxy.
 
 ## Criar método de tarefa
 
-<Tabs className="full-width-tabs filled-tabs request-tabs" groupId="captcha-type">
-<TabItem value="proxyless" label="FunCaptchaTask (sem proxy)" default className="method-panel">
-<MethodItem>
-```http
-https://api.capmonster.cloud/createTask
-````
-
-</MethodItem>
-<MethodDescription>
-**Exemplo de requisição**
-```json
-{
-  "clientKey": "API_KEY",
-  "task": {
-    "type": "FunCaptchaTask",
-    "websiteURL": "https://yourwebsite.com/page-with-funcaptcha",
-    "websitePublicKey": "your-website-key",
-    "funcaptchaApiJSSubdomain": "example-api.arkoselabs.com",
-    "data": "{\"blob\":\"your-blob-value-1234567890\"}",
-    "userAgent": "userAgentPlaceholder"
-  }
-}
-```
-**Exemplo de resposta**
-```json
-{
-  "errorId":0,
-  "taskId":407533077
-}
-```
-</MethodDescription>
-</TabItem>
-
-<TabItem value="proxy" label="FunCaptchaTask (com proxy)" default className="method-panel">
+<div className="method-panel">
 <MethodItem>
 ```http
 https://api.capmonster.cloud/createTask
 ```
 </MethodItem>
+
 <MethodDescription>
 **Exemplo de requisição**
 ```json
@@ -182,16 +152,16 @@ https://api.capmonster.cloud/createTask
   }
 }
 ```
+
 **Exemplo de resposta**
 ```json
 {
-  "errorId":0,
-  "taskId":407533077
+  "errorId": 0,
+  "taskId": 407533077
 }
 ```
 </MethodDescription>
-</TabItem>
-</Tabs>
+</div>
 
 ## Obter resultado da tarefa
 Use o método [getTaskResult](../api/methods/get-task-result.mdx) para obter a solução FunCaptcha.
@@ -312,6 +282,15 @@ const { chromium } = require("playwright");
 const apiKey = "YOUR_API_KEY"; // Chave de API do CapMonster Cloud
 const websiteURL = "https://www.example.com/"; // Página com FunCaptcha
 
+// Use o mesmo proxy no navegador e na tarefa do CapMonster Cloud
+const proxy = {
+    proxyType: "http",
+    proxyAddress: "123.45.67.89",
+    proxyPort: 8080,
+    proxyLogin: "username",
+    proxyPassword: "password"
+};
+
 // Aguarda o request do FunCaptcha, verifica e extrai public_key e blob
 async function captureBlobAndPublicKey(page) {
     return new Promise(resolve => {
@@ -345,7 +324,12 @@ async function createTask(blob, publicKey) {
         websiteURL,
         websitePublicKey: publicKey,
         data: JSON.stringify({ blob }),
-        userAgent: "userAgentPlaceholder"
+        userAgent: "userAgentPlaceholder",
+        proxyType: proxy.proxyType,
+        proxyAddress: proxy.proxyAddress,
+        proxyPort: proxy.proxyPort,
+        proxyLogin: proxy.proxyLogin,
+        proxyPassword: proxy.proxyPassword
     };
 
     const res = await fetch("https://api.capmonster.cloud/createTask", {
@@ -386,7 +370,14 @@ async function getTaskResult(taskId) {
 }
 
 (async () => {
-    const browser = await chromium.launch({ headless: false });
+    const browser = await chromium.launch({
+        headless: false,
+        proxy: {
+            server: `${proxy.proxyType}://${proxy.proxyAddress}:${proxy.proxyPort}`,
+            username: proxy.proxyLogin,
+            password: proxy.proxyPassword
+        }
+    });
     const page = await browser.newPage();
 
     // Bloqueia o iframe do captcha
@@ -453,6 +444,15 @@ from playwright.async_api import async_playwright
 API_KEY = "YOUR_API_KEY"  # Chave de API do CapMonster Cloud
 WEBSITE_URL = "https://www.example.com/"  # Página com FunCaptcha
 
+# Use o mesmo proxy no navegador e na tarefa do CapMonster Cloud
+PROXY = {
+    "proxyType": "http",
+    "proxyAddress": "123.45.67.89",
+    "proxyPort": 8080,
+    "proxyLogin": "username",
+    "proxyPassword": "password",
+}
+
 # Aguarda o request do FunCaptcha, intercepta e extrai public_key e blob
 async def capture_blob_and_public_key(page):
     future = asyncio.Future()
@@ -486,7 +486,12 @@ def create_task(blob, public_key):
         "websiteURL": WEBSITE_URL,
         "websitePublicKey": public_key,
         "data": json.dumps({"blob": blob}),  # Envia blob
-        "userAgent": "userAgentPlaceholder"
+        "userAgent": "userAgentPlaceholder",
+        "proxyType": PROXY["proxyType"],
+        "proxyAddress": PROXY["proxyAddress"],
+        "proxyPort": PROXY["proxyPort"],
+        "proxyLogin": PROXY["proxyLogin"],
+        "proxyPassword": PROXY["proxyPassword"],
     }
 
     res = requests.post(
@@ -524,7 +529,17 @@ def get_task_result(task_id):
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(
+            headless=False,
+            proxy={
+                "server": (
+                    f"{PROXY['proxyType']}://"
+                    f"{PROXY['proxyAddress']}:{PROXY['proxyPort']}"
+                ),
+                "username": PROXY["proxyLogin"],
+                "password": PROXY["proxyPassword"],
+            },
+        )
         page = await browser.new_page()
 
         # Bloqueia o iframe do FunCaptcha
@@ -593,6 +608,13 @@ class Program
     private static readonly string WebsiteURL = "https://www.example.com/"; // Página com FunCaptcha
     private static readonly HttpClient http = new HttpClient();
 
+    // Use o mesmo proxy no navegador e na tarefa do CapMonster Cloud
+    private const string ProxyTypeValue = "http";
+    private const string ProxyAddress = "123.45.67.89";
+    private const int ProxyPort = 8080;
+    private const string ProxyLogin = "username";
+    private const string ProxyPassword = "password";
+
     // Aguarda o request de rede do FunCaptcha, procura por public_key + blob
     static TaskCompletionSource<(string blob, string publicKey)> blobTcs;
 
@@ -603,7 +625,13 @@ class Program
         using var playwright = await Playwright.CreateAsync();
         var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = false
+            Headless = false,
+            Proxy = new Proxy
+            {
+                Server = $"{ProxyTypeValue}://{ProxyAddress}:{ProxyPort}",
+                Username = ProxyLogin,
+                Password = ProxyPassword
+            }
         });
 
         var page = await browser.NewPageAsync();
@@ -695,7 +723,12 @@ class Program
             websiteURL = WebsiteURL,
             websitePublicKey = publicKey,
             data = JsonSerializer.Serialize(new { blob }),
-            userAgent = "userAgentPlaceholder"
+            userAgent = "userAgentPlaceholder",
+            proxyType = ProxyTypeValue,
+            proxyAddress = ProxyAddress,
+            proxyPort = ProxyPort,
+            proxyLogin = ProxyLogin,
+            proxyPassword = ProxyPassword
         };
 
         var payload = new
@@ -773,19 +806,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     new ClientOptions({ clientKey: API_KEY })
   );
 
-  // Exemplo básico sem proxy
-  // O CapMonster Cloud usa automaticamente seus próprios proxies
-  let funCaptchaRequest = new FunCaptchaRequest({
-    websiteURL: "https://yourwebsite.com/page-with-funcaptcha",
-    websitePublicKey: "your-website-public-key",
-    funcaptchaApiJSSubdomain: "your-funcaptcha-api-subdomain",
-    data: '{"blob":"your-blob-value"}',
-    userAgent: "userAgentPlaceholder",
-  });
-
-  // Exemplo usando seu proxy
-  // Descomente este bloco se quiser usar seu próprio proxy
-  /*
+  // O FunCaptcha só pode ser resolvido usando seu próprio proxy
   const proxy = {
     proxyType: "http",
     proxyAddress: "123.45.67.89",
@@ -794,7 +815,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     proxyPassword: "password",
   };
 
-  funCaptchaRequest = new FunCaptchaRequest({
+  const funCaptchaRequest = new FunCaptchaRequest({
     websiteURL: "https://yourwebsite.com/page-with-funcaptcha",
     websitePublicKey: "your-website-public-key",
     funcaptchaApiJSSubdomain: "your-funcaptcha-api-subdomain",
@@ -802,7 +823,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     proxy,
     userAgent: "userAgentPlaceholder",
   });
-  */
 
   // Se necessário, você pode verificar o saldo
   const balance = await client.getBalance();
@@ -832,19 +852,7 @@ async function solveFunCaptcha() {
     new ClientOptions({ clientKey: API_KEY }),
   );
 
-  // Exemplo básico sem proxy
-  // O CapMonster Cloud usa automaticamente seus próprios proxies
-  let funCaptchaRequest = new FunCaptchaRequest({
-    websiteURL: "https://yourwebsite.com/page-with-funcaptcha",
-    websitePublicKey: "your-website-public-key",
-    funcaptchaApiJSSubdomain: "your-funcaptcha-api-subdomain",
-    data: '{"blob":"your-blob-value"}',
-    userAgent: "userAgentPlaceholder",
-  });
-
-  // Exemplo usando seu proxy
-  // Descomente este bloco se quiser usar seu próprio proxy
-  /*
+  // O FunCaptcha só pode ser resolvido usando seu próprio proxy
   const proxy = {
     proxyType: "http",
     proxyAddress: "123.45.67.89",
@@ -853,7 +861,7 @@ async function solveFunCaptcha() {
     proxyPassword: "password",
   };
 
-  funCaptchaRequest = new FunCaptchaRequest({
+  const funCaptchaRequest = new FunCaptchaRequest({
     websiteURL: "https://yourwebsite.com/page-with-funcaptcha",
     websitePublicKey: "your-website-public-key",
     funcaptchaApiJSSubdomain: "your-funcaptcha-api-subdomain",
@@ -861,7 +869,6 @@ async function solveFunCaptcha() {
     proxy,
     userAgent: "userAgentPlaceholder",
   });
-  */
 
   // Se necessário, você pode verificar o saldo
   const balance = await client.getBalance();
@@ -877,7 +884,7 @@ solveFunCaptcha().catch(console.error);
 </details>
   </TabItem>
 
-  <TabItem value="python1" label="Python" default className="method-panel">
+  <TabItem value="python1" label="Python" className="method-panel">
 <details>
       <summary>Mostrar código</summary>
 ```python
@@ -887,7 +894,6 @@ import asyncio
 
 from capmonstercloudclient import CapMonsterClient, ClientOptions
 from capmonstercloudclient.requests import FuncaptchaRequest
-# Importe ProxyInfo se pretende usar seu próprio proxy
 from capmonstercloudclient.requests.proxy_info import ProxyInfo
 
 API_KEY = "YOUR_API_KEY"  # Informe sua chave de API do CapMonster Cloud
@@ -898,19 +904,7 @@ async def solve_funcaptcha():
         options=ClientOptions(api_key=API_KEY)
     )
 
-    # Exemplo básico sem proxy
-    # O CapMonster Cloud usa automaticamente seus próprios proxies
-    funcaptcha_request = FuncaptchaRequest(
-        websiteUrl="https://yourwebsite.com/page-with-funcaptcha",
-        websitePublicKey="your-website-public-key",
-        funcaptchaApiJSSubdomain="your-funcaptcha-api-subdomain",
-        data='{"blob":"your-blob-value"}',
-        userAgent="userAgentPlaceholder",
-    )
-
-    # Exemplo usando seu proxy
-    # Descomente este bloco se quiser usar seu próprio proxy
-    """
+    # O FunCaptcha só pode ser resolvido usando seu próprio proxy
     proxy = ProxyInfo(
         proxyType="http",
         proxyAddress="123.45.67.89",
@@ -927,7 +921,6 @@ async def solve_funcaptcha():
         userAgent="userAgentPlaceholder",
         proxy=proxy,
     )
-    """
 
     # Se necessário, você pode verificar o saldo
     balance = await client.get_balance()
@@ -966,21 +959,8 @@ class Program
 
         var cmCloudClient = CapMonsterCloudClientFactory.Create(clientOptions);
 
-        // Exemplo básico sem proxy
-        // O CapMonster Cloud usa automaticamente seus próprios proxies
+        // O FunCaptcha só pode ser resolvido usando seu próprio proxy
         var funcaptchaRequest = new FunCaptchaRequest
-        {
-            WebsiteUrl = "https://yourwebsite.com/page-with-funcaptcha",
-            WebsiteKey = "your-website-public-key",
-            Subdomain = "your-funcaptcha-api-subdomain",
-            Data = "{\"blob\":\"your-blob-value\"}",
-            UserAgent = "userAgentPlaceholder"
-        };
-
-        // Exemplo usando seu proxy
-        // Descomente este bloco se quiser usar seu próprio proxy
-        /*
-        funcaptchaRequest = new FunCaptchaRequest
         {
             WebsiteUrl = "https://yourwebsite.com/page-with-funcaptcha",
             WebsiteKey = "your-website-public-key",
@@ -996,7 +976,6 @@ class Program
                 "password"
             )
         };
-        */
 
         // Se necessário, você pode verificar o saldo
         var balance = await cmCloudClient.GetBalanceAsync();
@@ -1014,3 +993,4 @@ class Program
   </TabItem>
 
 </Tabs>
+
