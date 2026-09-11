@@ -61,7 +61,11 @@ Verifique o valor de `taskId`. O erro pode ocorrer se a tarefa não existir, o p
 
 ### `CAPTCHA UNSOLVABLE`
 Código de erro na API: `ERROR_CAPTCHA_UNSOLVABLE` <br />
-Não foi possível resolver o CAPTCHA. Normalmente, essa é uma condição temporária — tente criar a tarefa novamente. Para CAPTCHAs com imagens, falhas repetidas podem indicar que a imagem não pode ser reconhecida corretamente: ela pode conter muito ruído, estar corrompida ou não conter uma resposta. Tarefas não resolvidas não são cobradas.
+Não foi possível resolver o CAPTCHA. Normalmente, esse é um erro temporário — tente criar a tarefa novamente. Verifique também se os parâmetros da solicitação estão corretos e atualizados.
+
+Para CAPTCHAs com imagens, erros repetidos podem indicar que a imagem não pode ser reconhecida corretamente: ela pode conter muito ruído, estar corrompida ou não conter uma resposta.
+
+Tarefas não resolvidas não são cobradas.
 
 ### `CAPTCHA IS NOT READY`
 Código de erro na API: `CAPTCHA_NOT_READY` <br />
