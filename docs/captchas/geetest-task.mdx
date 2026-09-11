@@ -365,9 +365,13 @@ https://example.com/api/v1/captcha/gee-test/init-params
 ```js
 async function getGeeTestV3Params() {
   // Замените URL на запрос вашего сайта,
-  // в ответе которого возвращаются gt и challenge
+  // в ответе которого возвращаются gt и challenge.
+  // Если запрос содержит динамические параметры,
+  // сформируйте их перед отправкой.
+  const timestamp = Date.now();
+
   const response = await fetch(
-    "https://example.com/api/v1/captcha/gee-test/init-params"
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
   );
 
   if (!response.ok) {
@@ -399,9 +403,13 @@ getGeeTestV3Params().catch(console.error);
 ```js
 async function getGeeTestV3Params() {
   // Замените URL на запрос вашего сайта,
-  // в ответе которого возвращаются gt и challenge
+  // в ответе которого возвращаются gt и challenge.
+  // Если запрос содержит динамические параметры,
+  // сформируйте их перед отправкой.
+  const timestamp = Date.now();
+
   const response = await fetch(
-    "https://example.com/api/v1/captcha/gee-test/init-params"
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
   );
 
   if (!response.ok) {
@@ -433,14 +441,23 @@ getGeeTestV3Params().catch(console.error);
       <summary>Показать код</summary>
 
 ```python
+import time
+
 import requests
 
 
 def get_geetest_v3_params():
     # Замените URL на запрос вашего сайта,
-    # в ответе которого возвращаются gt и challenge
+    # в ответе которого возвращаются gt и challenge.
+    # Если запрос содержит динамические параметры,
+    # сформируйте их перед отправкой.
+    timestamp = int(time.time() * 1000)
+
     response = requests.get(
-        "https://example.com/api/v1/captcha/gee-test/init-params"
+        "https://example.com/api/v1/captcha/gee-test/init-params",
+        params={
+            "t": timestamp,
+        },
     )
     response.raise_for_status()
 
@@ -483,10 +500,15 @@ class Program
         using var client = new HttpClient();
 
         // Замените URL на запрос вашего сайта,
-        // в ответе которого возвращаются gt и challenge
-        var response = await client.GetAsync(
-            "https://example.com/api/v1/captcha/gee-test/init-params"
-        );
+        // в ответе которого возвращаются gt и challenge.
+        // Если запрос содержит динамические параметры,
+        // сформируйте их перед отправкой.
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        var url =
+            $"https://example.com/api/v1/captcha/gee-test/init-params?t={timestamp}";
+
+        var response = await client.GetAsync(url);
 
         response.EnsureSuccessStatusCode();
 
@@ -515,9 +537,8 @@ class Program
     </details>
   </TabItem>
 </Tabs>
+
 <br />
-
-
 
 **Получение параметров из запроса GeeTest**
 
@@ -660,6 +681,7 @@ asyncio.run(
 </Tabs>
 
 <br />
+
 
 ### <span style={{fontSize: '1.5rem'}}>Используйте библиотеку SDK</span>
 

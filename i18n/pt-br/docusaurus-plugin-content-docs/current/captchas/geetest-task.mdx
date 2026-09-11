@@ -333,9 +333,13 @@ https://example.com/api/v1/captcha/gee-test/init-params
 ```js
 async function getGeeTestV3Params() {
   // Substitua a URL pela solicitação usada pelo seu site,
-  // cuja resposta retorna gt e challenge
+  // cuja resposta retorna gt e challenge.
+  // Se a solicitação contiver parâmetros dinâmicos,
+  // gere-os antes de enviá-la.
+  const timestamp = Date.now();
+
   const response = await fetch(
-    "https://example.com/api/v1/captcha/gee-test/init-params"
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
   );
 
   if (!response.ok) {
@@ -367,9 +371,13 @@ getGeeTestV3Params().catch(console.error);
 ```js
 async function getGeeTestV3Params() {
   // Substitua a URL pela solicitação usada pelo seu site,
-  // cuja resposta retorna gt e challenge
+  // cuja resposta retorna gt e challenge.
+  // Se a solicitação contiver parâmetros dinâmicos,
+  // gere-os antes de enviá-la.
+  const timestamp = Date.now();
+
   const response = await fetch(
-    "https://example.com/api/v1/captcha/gee-test/init-params"
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
   );
 
   if (!response.ok) {
@@ -382,7 +390,7 @@ async function getGeeTestV3Params() {
   const challenge = data.challenge;
 
   if (!gt || !challenge) {
-    throw new Error("Missing gt or challenge");
+    throw new Error("Não foi possível obter gt ou challenge");
   }
 
   console.log({ gt, challenge });
@@ -401,14 +409,23 @@ getGeeTestV3Params().catch(console.error);
       <summary>Mostrar código</summary>
 
 ```python
+import time
+
 import requests
 
 
 def get_geetest_v3_params():
     # Substitua a URL pela solicitação usada pelo seu site,
-    # cuja resposta retorna gt e challenge
+    # cuja resposta retorna gt e challenge.
+    # Se a solicitação contiver parâmetros dinâmicos,
+    # gere-os antes de enviá-la.
+    timestamp = int(time.time() * 1000)
+
     response = requests.get(
-        "https://example.com/api/v1/captcha/gee-test/init-params"
+        "https://example.com/api/v1/captcha/gee-test/init-params",
+        params={
+            "t": timestamp,
+        },
     )
     response.raise_for_status()
 
@@ -451,10 +468,15 @@ class Program
         using var client = new HttpClient();
 
         // Substitua a URL pela solicitação usada pelo seu site,
-        // cuja resposta retorna gt e challenge
-        var response = await client.GetAsync(
-            "https://example.com/api/v1/captcha/gee-test/init-params"
-        );
+        // cuja resposta retorna gt e challenge.
+        // Se a solicitação contiver parâmetros dinâmicos,
+        // gere-os antes de enviá-la.
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        var url =
+            $"https://example.com/api/v1/captcha/gee-test/init-params?t={timestamp}";
+
+        var response = await client.GetAsync(url);
 
         response.EnsureSuccessStatusCode();
 
@@ -483,6 +505,7 @@ class Program
     </details>
   </TabItem>
 </Tabs>
+
 <br />
 
 **Obtenção dos parâmetros a partir de uma solicitação do GeeTest**
