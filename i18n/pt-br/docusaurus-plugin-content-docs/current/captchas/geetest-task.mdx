@@ -37,17 +37,18 @@ Proxies com autorização de IP ainda não são suportados.
 :::
 
 :::info
-- Os parâmetros `gt`, `challenge` e `geetestApiServerSubdomain` são mais frequentemente encontrados dentro da função JavaScript `initGeetest`.
-- Você também pode vê-los no código HTML da página. Você pode encontrá-los no bloco `<sсript>`, que aparece após a página estar totalmente carregada no navegador.
-  
-V3
+
+Para **GeeTest V3**:
+- Os parâmetros `gt`, `challenge` e `geetestApiServerSubdomain` podem ser passados no código JavaScript de inicialização do GeeTest, por exemplo, na função `initGeetest`.
+
+- Alguns parâmetros também podem estar presentes no código HTML da página ou nas solicitações de rede. Para GeeTest V3, o valor de `challenge` deve ser obtido antes da inicialização do CAPTCHA.
 
 ![](./images/geetest-task/Aspose.Words.09e28b99-ec8b-4638-848b-cdd6fefc7ac8.001.png)
 
-V4 (captcha_id = gt)
+Para **GeeTest V4**, o parâmetro `gt` contém o valor de `captcha_id`.
 
 ![](./images/geetest-task/Aspose.Words.09e28b99-ec8b-4638-848b-cdd6fefc7ac8.002.png)
-:::
+::: 
 
 <br />
 
@@ -68,9 +69,8 @@ Abaixo estão exemplos dos tipos de tarefas GeeTest V3 atualmente compatíveis c
 
 <br />
 <span style={{ fontSize: "15px", fontWeight: 700 }}>
->  IMPORTANTE: alguns valores de parâmetros são dinâmicos — eles mudam a cada renderização da página que contém GeeTest v3.  
-> Extraia-os imediatamente antes de criar a tarefa para evitar erros durante a resolução.  
-> Veja exemplos de extração automática de parâmetros na seção [Como encontrar todos os parâmetros necessários para criar uma tarefa](#como-encontrar-todos-os-parâmetros-necessários-para-criar-uma-tarefa).
+> IMPORTANTE: o parâmetro `challenge` no GeeTest V3 é dinâmico.  
+> Obtenha um novo valor imediatamente antes de criar cada tarefa e antes da inicialização do CAPTCHA na página. Depois que o CAPTCHA for carregado, o valor de `challenge` obtido anteriormente se tornará inválido.
 </span>
 <br />
 
@@ -91,12 +91,11 @@ Abaixo estão exemplos dos tipos de tarefas GeeTest V3 atualmente compatíveis c
     ---
 
     <ParamItem title="challenge" required="required only for V3" type="string" />
-    <p>
-    Um novo valor de `challenge` deve ser obtido para cada solicitação à API. Se o captcha já tiver sido carregado na página, o valor atual de `challenge` se tornará inválido, e a API retornará o [erro](../api/api-errors.mdx) `ERROR_TOKEN_EXPIRED`.<br />
-As tarefas que terminarem com o erro `ERROR_TOKEN_EXPIRED` serão cobradas como tarefas resolvidas com sucesso.<br />
-É necessário analisar as requisições de rede e identificar a solicitação cuja resposta contém o valor atual de `challenge`. <br />
-Antes de criar cada tarefa de resolução de captcha, essa solicitação deve ser executada novamente, e um novo valor de `challenge` deve ser extraído da resposta.
-    </p>
+    Chave dinâmica. Um novo valor de `challenge` deve ser obtido antes de criar cada tarefa.<br />
+
+    **Importante:** obtenha `challenge` antes da inicialização do CAPTCHA na página.<br />
+
+Se o CAPTCHA já tiver sido carregado, o valor obtido se tornará inválido. Ao enviar esse valor para a API do CapMonster Cloud, será retornado o [erro](../api/api-errors.mdx) `ERROR_INVALID_TASK` com uma mensagem indicando que o parâmetro é inválido.<br />
 
     ---
 
@@ -272,91 +271,136 @@ https://api.capmonster.cloud/getTaskResult
 <tr><td>seccode</td><td>String</td></tr>
 </table>
 
-### Como encontrar todos os parâmetros necessários para criar uma tarefa
+### <span style={{fontSize: '1.5rem'}}>Como encontrar todos os parâmetros necessários para criar uma tarefa</span>
 
-#### Manualmente
+#### <span style={{fontSize: '1.2rem'}}>Manualmente</span>
 
-1. Abra seu site onde o captcha aparece no navegador.
-2. Clique com o botão direito no elemento do captcha e selecione **Inspecionar**.
+1. Abra no navegador o site em que o GeeTest V3 é exibido.
+2. Abra as ferramentas do desenvolvedor (**DevTools**) e acesse a guia **Network**.
+3. Recarregue a página para registrar as solicitações de rede desde o início do carregamento.
+4. Encontre uma solicitação ao servidor do site de destino cuja resposta contenha os parâmetros do GeeTest, incluindo `gt` e `challenge`.
 
-Todos os parâmetros podem ser encontrados em *init-params* entre as requisições:
+O valor de `challenge` deve ser obtido **antes da inicialização do CAPTCHA**, ou seja, antes de uma solicitação do GeeTest como esta ser enviada:
 
-![paramsv3](images/geetest-task/init-params.png)
+```text
+https://api.geetest.com/gettype.php?gt=...
+```
 
-### Automaticamente
+Antes da inicialização do CAPTCHA, o site pode obter os parâmetros do GeeTest do próprio servidor. Para encontrar o valor atual de `challenge`, verifique as solicitações ao domínio do site de destino e suas respostas.
 
-Para automatizar a extração dos parâmetros, eles podem ser obtidos via **navegador** (normal ou headless, por exemplo, usando **Playwright**) ou diretamente a partir de **requisições HTTP**. Como os valores dos parâmetros dinâmicos têm curta duração, recomenda-se utilizá-los imediatamente após a extração.
+![](images/geetest-task/init-params.png)
 
-:::warning **Importante!**
-Os trechos de código fornecidos são exemplos básicos para aprendizado sobre como extrair os parâmetros necessários. A implementação exata dependerá do seu site com captcha, sua estrutura e os elementos HTML e seletores utilizados.
+Em alguns casos, o site criptografa os dados recebidos do próprio servidor, portanto o valor de `challenge` pode não estar disponível de forma explícita na resposta. Nesse caso, ele pode ser obtido a partir dos parâmetros das solicitações do GeeTest, por exemplo:
+
+```text
+https://api.geetest.com/get.php?gt=...
+```
+
+e/ou:
+
+```text
+https://api.geevisit.com/ajax.php?gt=...
+```
+
+![](images/geetest-task/geetest-v3-get-params.png)
+
+:::warning Importante:
+Nesse método, obtenha os parâmetros da solicitação e **bloqueie as solicitações à API do GeeTest antes que sejam enviadas**. Se a solicitação for enviada e o CAPTCHA for carregado, o valor de `challenge` usado nessa solicitação se tornará inválido.
 :::
+
+Depois de obter os valores atuais de `gt` e `challenge`, use-os para criar uma tarefa GeeTest V3 no CapMonster Cloud.
+<br />
+
+#### <span style={{fontSize: '1.2rem'}}>Automaticamente</span>
+
+A obtenção dos parâmetros do GeeTest V3 pode ser automatizada de duas maneiras. Escolha a opção adequada conforme a implementação do site de destino.
+
+**Obtenção dos parâmetros a partir da resposta do servidor do site**
+
+Se o servidor do site retornar `gt` e `challenge` de forma explícita, repita a solicitação correspondente antes de criar a tarefa.
+
+Por exemplo:
+
+```text
+https://example.com/api/v1/captcha/gee-test/init-params
+```
 
 <Tabs className="full-width-tabs filled-tabs request-tabs">
   <TabItem value="js" label="JavaScript" default className="method-panel">
     <details>
       <summary>Mostrar código (no navegador)</summary>
 
-      ```js
-      (function detectGeeTestV3Browser() {
-        const t = Date.now();
-        const url = `https://example.com/api/v1/captcha/gee-test/init-params?t=${t}`;
+```js
+async function getGeeTestV3Params() {
+  // Substitua a URL pela solicitação usada pelo seu site,
+  // cuja resposta retorna gt e challenge.
+  // Se a solicitação contiver parâmetros dinâmicos,
+  // gere-os antes de enviá-la.
+  const timestamp = Date.now();
 
-        fetch(url)
-          .then(res => res.json())
-          .then(data => {
-            const { gt, challenge } = data;
-            if (gt && challenge) {
-              console.log("GeeTest v3 detectado:");
-              console.log({ gt, challenge });
-            } else {
-              console.log("Falha ao encontrar os parâmetros gt/challenge");
-            }
-          })
-          .catch(err => console.error("Erro na requisição:", err));
-      })();
-      ```
+  const response = await fetch(
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  const gt = data.gt;
+  const challenge = data.challenge;
+
+  if (!gt || !challenge) {
+    throw new Error("Não foi possível obter gt ou challenge");
+  }
+
+  console.log({ gt, challenge });
+
+  return { gt, challenge };
+}
+
+getGeeTestV3Params().catch(console.error);
+```
+
     </details>
 
     <details>
       <summary>Mostrar código (Node.js)</summary>
 
-      ```js
-      async function detectGeeTestV3() {
-        const result = {
-          version: null,
-          data: {},
-        };
+```js
+async function getGeeTestV3Params() {
+  // Substitua a URL pela solicitação usada pelo seu site,
+  // cuja resposta retorna gt e challenge.
+  // Se a solicitação contiver parâmetros dinâmicos,
+  // gere-os antes de enviá-la.
+  const timestamp = Date.now();
 
-        const t = Date.now(); // Obter timestamp atual
-        try {
-          const response = await fetch(
-            `https://example.com/api/v1/captcha/gee-test/init-params?t=${t}`
-          );
+  const response = await fetch(
+    `https://example.com/api/v1/captcha/gee-test/init-params?t=${timestamp}`
+  );
 
-          if (response.ok) {
-            const data = await response.json();
-            const challenge = data.challenge;
-            const gt = data.gt;
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
 
-            if (gt && challenge) {
-              result.version = "v3";
-              result.data = { gt, challenge };
-              console.log(result.data);
-            } else {
-              console.log("Erro: gt ou challenge ausentes");
-            }
-          } else {
-            console.log("Erro: status de resposta inválido", response.status);
-          }
-        } catch (error) {
-          console.error("Falha na requisição", error);
-        }
+  const data = await response.json();
 
-        return result;
-      }
+  const gt = data.gt;
+  const challenge = data.challenge;
 
-      detectGeeTestV3();
-      ```
+  if (!gt || !challenge) {
+    throw new Error("Não foi possível obter gt ou challenge");
+  }
+
+  console.log({ gt, challenge });
+
+  return { gt, challenge };
+}
+
+getGeeTestV3Params().catch(console.error);
+```
+
     </details>
   </TabItem>
 
@@ -364,36 +408,46 @@ Os trechos de código fornecidos são exemplos básicos para aprendizado sobre c
     <details>
       <summary>Mostrar código</summary>
 
-      ```python
-      import requests
-      import asyncio
-      import time
+```python
+import time
 
-      async def detect_gee_test_v3():
-        result = {
-            'version': None,
-            'data': {},
-        }
+import requests
 
-        t = int(time.time() * 1000)
-        response = requests.get(f'https://example.com/api/v1/captcha/gee-test/init-params?t={t}')
-        
-        if response.status_code == 200:
-            data = response.json()
-            challenge = data.get('challenge')
-            gt = data.get('gt')
 
-            if gt and challenge:
-                result['version'] = 'v3'
-                result['data'] = {'gt': gt, 'challenge': challenge}
-                print(result['data'])
-            else:
-                print('erro')
+def get_geetest_v3_params():
+    # Substitua a URL pela solicitação usada pelo seu site,
+    # cuja resposta retorna gt e challenge.
+    # Se a solicitação contiver parâmetros dinâmicos,
+    # gere-os antes de enviá-la.
+    timestamp = int(time.time() * 1000)
 
-        return result
+    response = requests.get(
+        "https://example.com/api/v1/captcha/gee-test/init-params",
+        params={
+            "t": timestamp,
+        },
+    )
+    response.raise_for_status()
 
-      asyncio.run(detect_gee_test_v3())
-      ```
+    data = response.json()
+
+    gt = data.get("gt")
+    challenge = data.get("challenge")
+
+    if not gt or not challenge:
+        raise ValueError("Não foi possível obter gt ou challenge")
+
+    print({
+        "gt": gt,
+        "challenge": challenge,
+    })
+
+    return gt, challenge
+
+
+get_geetest_v3_params()
+```
+
     </details>
   </TabItem>
 
@@ -401,66 +455,201 @@ Os trechos de código fornecidos são exemplos básicos para aprendizado sobre c
     <details>
       <summary>Mostrar código</summary>
 
-      ```csharp
-      using System;
-      using System.Net.Http;
-      using System.Threading.Tasks;
-      using Newtonsoft.Json.Linq;
+```csharp
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
-      class Program
-      {
-          static async Task DetectGeeTestV3()
-          {
-              var result = new
-              {
-                  version = (string)null,
-                  data = new { gt = (string)null, challenge = (string)null },
-              };
+class Program
+{
+    static async Task GetGeeTestV3Params()
+    {
+        using var client = new HttpClient();
 
-              using (var client = new HttpClient())
-              {
-                  long t = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                  var url = $"https://example.com/api/v1/captcha/gee-test/init-params?t={t}";
+        // Substitua a URL pela solicitação usada pelo seu site,
+        // cuja resposta retorna gt e challenge.
+        // Se a solicitação contiver parâmetros dinâmicos,
+        // gere-os antes de enviá-la.
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                  var response = await client.GetAsync(url);
+        var url =
+            $"https://example.com/api/v1/captcha/gee-test/init-params?t={timestamp}";
 
-                  if (response.IsSuccessStatusCode)
-                  {
-                      var responseContent = await response.Content.ReadAsStringAsync();
-                      var data = JObject.Parse(responseContent);
-                      var challenge = data["challenge"]?.ToString();
-                      var gt = data["gt"]?.ToString();
+        var response = await client.GetAsync(url);
 
-                      if (!string.IsNullOrEmpty(gt) && !string.IsNullOrEmpty(challenge))
-                      {
-                          result = new
-                          {
-                              version = "v3",
-                              data = new { gt = gt, challenge = challenge }
-                          };
-                          Console.WriteLine($"GT: {gt}, Challenge: {challenge}");
-                      }
-                      else
-                      {
-                          Console.WriteLine("Erro: Parâmetros necessários ausentes.");
-                      }
-                  }
-                  else
-                  {
-                      Console.WriteLine("Erro: Falha ao obter resposta.");
-                  }
-              }
-          }
+        response.EnsureSuccessStatusCode();
 
-          static async Task Main(string[] args)
-          {
-              await DetectGeeTestV3();
-          }
-      }
-      ```
+        var content = await response.Content.ReadAsStringAsync();
+        var data = JObject.Parse(content);
+
+        var gt = data["gt"]?.ToString();
+        var challenge = data["challenge"]?.ToString();
+
+        if (string.IsNullOrEmpty(gt) || string.IsNullOrEmpty(challenge))
+        {
+            throw new Exception("Não foi possível obter gt ou challenge");
+        }
+
+        Console.WriteLine($"GT: {gt}");
+        Console.WriteLine($"Challenge: {challenge}");
+    }
+
+    static async Task Main()
+    {
+        await GetGeeTestV3Params();
+    }
+}
+```
+
     </details>
   </TabItem>
 </Tabs>
+
+<br />
+
+**Obtenção dos parâmetros a partir de uma solicitação do GeeTest**
+
+Se o valor de `challenge` não estiver disponível de forma explícita na resposta do servidor do site, obtenha-o a partir da solicitação correspondente do GeeTest:
+
+```text
+https://api.geetest.com/get.php?gt=...&challenge=...
+```
+
+ou:
+
+```text
+https://api.geevisit.com/ajax.php?gt=...&challenge=...
+```
+
+Extraia `gt` e `challenge` dos parâmetros de consulta e bloqueie a solicitação antes que ela seja enviada.
+
+<Tabs className="full-width-tabs filled-tabs request-tabs">
+  <TabItem value="js" label="JavaScript / TypeScript" default className="method-panel">
+    <details>
+      <summary>Mostrar código (Playwright)</summary>
+
+```js
+import { chromium } from "playwright";
+
+async function getGeeTestV3Params(pageUrl) {
+  const browser = await chromium.launch({ headless: false });
+  const context = await browser.newContext();
+
+  let params = null;
+
+  await context.route("**/*", async (route) => {
+    const requestUrl = route.request().url();
+
+    if (
+      requestUrl.includes("api.geetest.com/get.php") ||
+      requestUrl.includes("api.geevisit.com/ajax.php")
+    ) {
+      const url = new URL(requestUrl);
+
+      const gt = url.searchParams.get("gt");
+      const challenge = url.searchParams.get("challenge");
+
+      if (gt && challenge && !params) {
+        params = { gt, challenge };
+        console.log(params);
+      }
+
+      await route.abort();
+      return;
+    }
+
+    await route.continue();
+  });
+
+  const page = await context.newPage();
+  await page.goto(pageUrl);
+
+  await page.waitForTimeout(5000);
+  await browser.close();
+
+  if (!params) {
+    throw new Error("Não foi possível obter gt e challenge");
+  }
+
+  return params;
+}
+
+getGeeTestV3Params(
+  "https://example.com/page-with-geetest"
+).catch(console.error);
+```
+
+    </details>
+  </TabItem>
+
+  <TabItem value="python" label="Python" className="method-panel">
+    <details>
+      <summary>Mostrar código (Playwright)</summary>
+
+```python
+import asyncio
+from urllib.parse import urlparse, parse_qs
+
+from playwright.async_api import async_playwright
+
+
+async def get_geetest_v3_params(page_url):
+    params = {}
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+
+        async def handle_route(route):
+            request_url = route.request.url
+
+            if (
+                "api.geetest.com/get.php" in request_url
+                or "api.geevisit.com/ajax.php" in request_url
+            ):
+                query = parse_qs(urlparse(request_url).query)
+
+                gt = query.get("gt", [None])[0]
+                challenge = query.get("challenge", [None])[0]
+
+                if gt and challenge and not params:
+                    params["gt"] = gt
+                    params["challenge"] = challenge
+                    print(params)
+
+                await route.abort()
+                return
+
+            await route.continue_()
+
+        await context.route("**/*", handle_route)
+
+        page = await context.new_page()
+        await page.goto(page_url)
+
+        await asyncio.sleep(5)
+        await browser.close()
+
+    if not params:
+        raise RuntimeError("Não foi possível obter gt e challenge")
+
+    return params
+
+
+asyncio.run(
+    get_geetest_v3_params(
+        "https://example.com/page-with-geetest"
+    )
+)
+```
+
+    </details>
+  </TabItem>
+</Tabs>
+
+<br />
+
 
 ### <span style={{fontSize: '1.5rem'}}>Usar biblioteca SDK</span>
 
